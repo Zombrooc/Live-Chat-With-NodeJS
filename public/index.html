@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title> Meu Chat </title>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
+        <link rel="stylesheet" type="text/css" href="static/css/homeScreen_stylesheet.css">
+        
+    </head>
+    <body>
+        <form id="chat">
+            <input type="text" name="username" placeholder="Digite seu usuário">
+            <div class="messages" style="overflow: scroll;"></div>
+            <input type="text" name="message" placeholder="Digite a mensagem">
+            <button type="submit"> Enviar </button>
+        </form>
+
+
+        <script type="text/javascript">
+            var socket = io('https://donkey-chat.herokuapp.com/');
+
+
+            function renderMessage(message){
+                console.log(message)
+                $('.messages').append('<div class="message"><strong>'+message.author+':  </strong>'+message.message +'</div>');
+
+            }
+
+            socket.on('previewsMessage', function(messages){
+                for (message of messages){
+                    renderMessage(message);
+                }
+
+            });
+
+            socket.on('receivedMessage', function(message){
+                renderMessage(message);
+            });
+
+            $('#chat').submit(function(event){
+                event.preventDefault();
+
+                var author = $('input[name=username]').val();
+                var message = $('input[name=message]').val();
+
+                if (author.length && message.length){
+                    var messageObject = {
+                        author: author,
+                        message: message
+                    };
+
+                    renderMessage(messageObject);
+
+                    socket.emit('sendMessage', messageObject);
+                }
+            });
+        </script>
+    </body>
+</html>
